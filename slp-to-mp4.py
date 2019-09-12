@@ -3,13 +3,14 @@ import os, sys, json, subprocess, time, shutil, uuid
 from pathlib import Path
 from slippi import Game
 
+VERSION = '1.0.0'
 USAGE = """\
-slp-to-mp4 - convert slippi files to mp4 videos
+slp-to-mp4 {}
+Convert slippi files to mp4 videos
 
 USAGE: slp-to-mp4.py REPLAY_FILE [OUT_FILE]
 
 Notes:
-This script requires a config.json, Dolphin.ini and GFX.ini in the same directory
 OUT_FILE can be a directory or a file name ending in .mp4, or omitted.
 e.g.
 This will create my_replay.mp4 in the current directory:
@@ -20,7 +21,9 @@ This will create my_video.mp4 in the current directory:
 
 This will create videos/my_replay.mp4, creating the videos directory if it doesn't exist
  $ slp-to-mp4.py my_replay.slp videos
-"""
+
+See README.md for details
+""".format(VERSION)
 
 MAX_WAIT_SECONDS = 8 * 60 + 10
 FPS = 60

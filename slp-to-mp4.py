@@ -35,8 +35,6 @@ THIS_CONFIG = os.path.join(SCRIPT_DIR, 'config.json')
 THIS_DOLPHIN_INI = os.path.join(SCRIPT_DIR, 'Dolphin.ini')
 THIS_GFX_INI = os.path.join(SCRIPT_DIR, 'GFX.ini')
 COMM_FILE = os.path.join(SCRIPT_DIR, 'slippi-comm-{}.txt'.format(JOB_ID))
-AUDIO_IN_FILE = os.path.join(SCRIPT_DIR, 'audio-{}.audio'.format(JOB_ID))
-VIDEO_IN_FILE = os.path.join(SCRIPT_DIR, 'video-{}.video'.format(JOB_ID))
 
 class Config:
     def __init__(self):
@@ -164,21 +162,18 @@ def main():
     # ####################################################
     # Encode
 
-    # Move audio and video files to cwd
     if not os.path.exists(conf.audio_file):
         raise RuntimeError("Audio dump missing!")
     if not os.path.exists(conf.video_file):
         raise RuntimeError("Frame dump missing!")
-    shutil.move(conf.audio_file, AUDIO_IN_FILE)
-    shutil.move(conf.video_file, VIDEO_IN_FILE)
 
     # Convert audio and video to video
     cmd = [
         conf.ffmpeg,
         '-y',                   # overwrite output file without asking
-        '-i', AUDIO_IN_FILE,    # 0th input stream: audio
+        '-i', conf.audio_file,  # 0th input stream: audio
         '-itsoffset', '1.55',   # offset (delay) the audio by 1.55s
-        '-i', VIDEO_IN_FILE,    # 1st input stream: video
+        '-i', conf.video_file,  # 1st input stream: video
         '-map', '1:v',          # map 1st input to video output
         '-map', '0:a',          # map 0th input to audio output
         '-c:a', 'mp3',          # convert audio encoding to mp3 for output
@@ -189,8 +184,6 @@ def main():
     proc_ffmpeg = subprocess.Popen(args=cmd)
     proc_ffmpeg.wait()
 
-    os.remove(AUDIO_IN_FILE)
-    os.remove(VIDEO_IN_FILE)
     os.remove(COMM_FILE)
 
     print('Created {}'.format(outfile))

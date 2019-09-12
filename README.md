@@ -36,7 +36,6 @@ Then ffmpeg is invoked to combine audio and video.
 An mp4 file with the same name as the replay is created in the slp-to-mp4 directory.
 
 ## Future work
-- Make interface nicer - specify output file name or directory, show usage etc
 - Decrease setup steps - automatically modify and restore Dolphin configuration files
 - Batch jobs for running on powerful PCs
 - Run Dolphin at higher emulation speed if possible

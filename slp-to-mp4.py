@@ -3,6 +3,25 @@ import os, sys, json, subprocess, time, shutil, uuid
 from pathlib import Path
 from slippi import Game
 
+USAGE = """\
+slp-to-mp4 - convert slippi files to mp4 videos
+
+USAGE: slp-to-mp4.py REPLAY_FILE [OUT_FILE]
+
+Notes:
+This script requires a config.json, Dolphin.ini and GFX.ini in the same directory
+OUT_FILE can be a directory or a file name ending in .mp4, or omitted.
+e.g.
+This will create my_replay.mp4 in the current directory:
+ $ slp-to-mp4.py my_replay.slp
+
+This will create my_video.mp4 in the current directory:
+ $ slp-to-mp4.py my_replay.slp my_video.mp4
+
+This will create videos/my_replay.mp4, creating the videos directory if it doesn't exist
+ $ slp-to-mp4.py my_replay.slp videos
+"""
+
 MAX_WAIT_SECONDS = 8 * 60 + 10
 FPS = 60
 JOB_ID = uuid.uuid4()
@@ -44,17 +63,42 @@ def count_frames_completed(conf):
 
 def main():
 
+    # Some basic checks before continuing
+
+    if not (os.path.exists(THIS_CONFIG) and os.path.exists(THIS_DOLPHIN_INI) and os.path.exists(THIS_GFX_INI)):
+        print(USAGE)
+        sys.exit()
+
+    # Parse arguments
+
+    if len(sys.argv) == 1 or '-h' in sys.argv:
+        print(USAGE)
+        sys.exit()
+
+    slp_file = os.path.abspath(sys.argv[1])
+
+    # Handle all the outfile argument possibilities
+    outfile = ''
+    if len(sys.argv) > 2:
+        outfile_name = ''
+        outdir = ''
+        if sys.argv[2].endswith('.mp4'):
+            outdir, outfile_name = os.path.split(sys.argv[2])
+        else:
+            outdir = sys.argv[2]
+            outfile_name, _ = os.path.splitext(os.path.basename(slp_file))
+            outfile_name += '.mp4'
+
+        # We need to remove '..' etc from the path before making directories
+        outdir = os.path.abspath(outdir)
+        os.makedirs(outdir, exist_ok=True)
+        outfile = os.path.join(outdir, outfile_name)
+    else:
+        outfile, _ = os.path.splitext(os.path.basename(slp_file))
+        outfile += '.mp4'
+
     # ####################################################
     # Set up files, load config etc
-
-    # Get filename
-    slp_file = os.path.abspath(sys.argv[1])
-    # TODO help option
-    # TODO flexibility with output file
-    slp_file_name = os.path.basename(slp_file)
-    outfile_name, _ = os.path.splitext(slp_file_name)
-    outfile_name += '.mp4'
-    outfile = os.path.join(SCRIPT_DIR, outfile_name)
 
     conf = Config()
 

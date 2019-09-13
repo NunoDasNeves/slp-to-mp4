@@ -32,8 +32,7 @@ JOB_ID = uuid.uuid4()
 # Paths to files in (this) script's directory
 SCRIPT_DIR, _ = os.path.split(os.path.abspath(sys.argv[0]))
 THIS_CONFIG = os.path.join(SCRIPT_DIR, 'config.json')
-THIS_DOLPHIN_INI = os.path.join(SCRIPT_DIR, 'Dolphin.ini')
-THIS_GFX_INI = os.path.join(SCRIPT_DIR, 'GFX.ini')
+THIS_USER_DIR = os.path.join(SCRIPT_DIR, 'User')
 COMM_FILE = os.path.join(SCRIPT_DIR, 'slippi-comm-{}.txt'.format(JOB_ID))
 
 class Config:
@@ -41,16 +40,25 @@ class Config:
         with open(THIS_CONFIG, 'r') as f:
             j = json.loads(f.read())
             self.melee_iso = os.path.expanduser(j['melee_iso'])
+            self.check_path(self.melee_iso)
             self.dolphin_dir = os.path.expanduser(j['dolphin_dir'])
+            self.check_path(self.dolphin_dir)
             self.ffmpeg = os.path.expanduser(j['ffmpeg'])
+            self.check_path(self.ffmpeg)
 
         self.dolphin_bin = str(Path(self.dolphin_dir, 'dolphin-emu'))
-        self.render_time_file = str(Path(self.dolphin_dir, 'User', 'Logs', 'render_time.txt'))
-        self.dump_dir = str(Path(self.dolphin_dir, 'User', 'Dump'))
+        self.check_path(self.dolphin_bin)
+
+        self.render_time_file = str(Path(THIS_USER_DIR, 'Logs', 'render_time.txt'))
+        self.dump_dir = str(Path(THIS_USER_DIR, 'Dump'))
         self.frames_dir = str(Path(self.dump_dir, 'Frames'))
         self.audio_dir = str(Path(self.dump_dir,'Audio'))
         self.video_file = str(Path(self.frames_dir, 'framedump1.avi'))
         self.audio_file = str(Path(self.audio_dir, 'dspdump.wav'))
+
+    def check_path(self, path):
+        if not os.path.exists(path):
+            raise RuntimeError("{} does not exist".format(path))
 
 def count_frames_completed(conf):
     num_completed = 0
@@ -66,7 +74,7 @@ def main():
 
     # Some basic checks before continuing
 
-    if not (os.path.exists(THIS_CONFIG) and os.path.exists(THIS_DOLPHIN_INI) and os.path.exists(THIS_GFX_INI)):
+    if not (os.path.exists(THIS_CONFIG) and os.path.exists(THIS_USER_DIR)):
         print(USAGE)
         sys.exit()
 
@@ -114,10 +122,14 @@ def main():
 
     # Remove existing dump files
     print("Removing", conf.dump_dir)
-    for path in os.listdir(conf.dump_dir):
-        shutil.rmtree(path, ignore_errors=True)
+    if os.path.exists(conf.dump_dir):
+        shutil.rmtree(conf.dump_dir, ignore_errors=True)
 
-    # TODO Dolphin.ini, GFX.ini stuff
+    # We have to create 'Frames' and 'Audio' because reasons
+    # See Dolphin source: Source/Core/VideoCommon/AVIDump.cpp:AVIDump:CreateVideoFile() - it doesn't create the thing
+    # TODO: patch Dolphin I guess
+    os.makedirs(conf.frames_dir, exist_ok=True)
+    os.makedirs(conf.audio_dir, exist_ok=True)
 
     # Create a slippi 'comm' file to tell dolphin which file to play
     comm_data = {
@@ -138,7 +150,8 @@ def main():
         conf.dolphin_bin,
         '-i', COMM_FILE,        # The comm file tells dolphin which slippi file to play (see above)
         '-b',                   # Exit dolphin when emulation ends
-        '-e', conf.melee_iso    # ISO to use
+        '-e', conf.melee_iso,   # ISO to use
+        '-u', THIS_USER_DIR     # Custom User directory so we don't have to copy config files
         ]
     print(' '.join(cmd))
     # TODO run faster than realtime if possible
@@ -149,6 +162,9 @@ def main():
     while count_frames_completed(conf) < num_frames:
         if time.perf_counter() - start_timer > MAX_WAIT_SECONDS:
             raise RuntimeError("Timed out waiting for render")
+        if proc_dolphin.poll() is not None:
+            print("WARNING: Dolphin exited before replay finished - may not have recorded entire replay")
+            break
         time.sleep(1)
 
     # Kill dolphin

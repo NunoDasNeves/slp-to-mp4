@@ -2,3 +2,19 @@ slippi-com*.txt
 *.mp4
 *.audio
 *.video
+
+# Unneeded User/ directories
+User/Dump
+User/Config/Profiles
+User/Shaders
+User/Cache
+User/GC
+User/Load
+User/Logs
+User/Maps
+User/ScreenShots
+User/Shaders
+User/StateSaves
+User/Themes
+User/Wii
+

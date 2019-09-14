@@ -4,7 +4,8 @@ This script converts [Project Slippi](https://github.com/project-slippi/project-
 This exists as an alternative to using screen capture software to record the Dolphin window playing back a replay.
 
 ## Dependencies
-This script was written for Linux but may work on Windows too.
+
+### Linux
 
 Python >= 3.7  
 https://www.python.org/downloads/
@@ -20,11 +21,27 @@ https://github.com/hohav/py-slippi
 
 A Super Smash Bros. Melee v1.02 NTSC ISO.
 
+### Windows
+
+Python >= 3.7  
+https://www.python.org/downloads/
+
+py-slippi for parsing the slippi file (pip install)  
+https://github.com/hohav/py-slippi
+
+A Super Smash Bros. Melee v1.02 NTSC ISO.
+
 ## Setup
+
+### Linux
 
 Modify the paths in config.json to point to your Melee ISO, ffmpeg binary and the directory of the playback instance of Dolphin.
 
 Copy Dolphin.ini and GFX.ini to the playback Dolphin's config directory: `playback/User/Config`. You should back up the existing files in case you want to play slippi replays with the [desktop app](https://github.com/project-slippi/slippi-desktop-app/) later.
+
+### Windows
+
+Copy your Super Smash Bros. Melee v1.02 NTSC ISO to SSBMelee.iso in this directory or modify config_windows.json to point to another. Then run the python script and the necessary dependencies will install. If you wish to re-install after the first recording, remove the 'installed' file.
 
 ## Usage
 

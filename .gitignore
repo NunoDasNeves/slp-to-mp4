@@ -2,3 +2,11 @@ slippi-com*.txt
 *.mp4
 *.audio
 *.video
+*.slp
+*.iso
+*.exe
+.idea/
+installed
+FM-v*
+slippi-r18-playback*
+ffmpeg*

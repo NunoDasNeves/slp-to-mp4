@@ -7,13 +7,14 @@ from io import BytesIO
 from zipfile import ZipFile
 import tarfile
 
+VERSION = '1.0.0'
 USAGE = """\
-slp-to-mp4 - convert slippi files to mp4 videos
+slp-to-mp4 {}
+Convert slippi files to mp4 videos
 
 USAGE: slp-to-mp4.py REPLAY_FILE [OUT_FILE]
 
 Notes:
-This script requires a config.json, Dolphin.ini and GFX.ini in the same directory
 OUT_FILE can be a directory or a file name ending in .mp4, or omitted.
 e.g.
 This will create my_replay.mp4 in the current directory:
@@ -24,7 +25,9 @@ This will create my_video.mp4 in the current directory:
 
 This will create videos/my_replay.mp4, creating the videos directory if it doesn't exist
  $ slp-to-mp4.py my_replay.slp videos
-"""
+
+See README.md for details
+""".format(VERSION)
 
 MAX_WAIT_SECONDS = 8 * 60 + 10
 MIN_GAME_LENGTH = 30 * 60
@@ -45,32 +48,39 @@ if sys.platform == "win32":
     THIS_CONFIG = os.path.join(SCRIPT_DIR, 'config_windows.json')
 else:
     THIS_CONFIG = os.path.join(SCRIPT_DIR, 'config.json')
-THIS_DOLPHIN_INI = os.path.join(SCRIPT_DIR, 'Dolphin.ini')
-THIS_GFX_INI = os.path.join(SCRIPT_DIR, 'GFX.ini')
+THIS_USER_DIR = os.path.join(SCRIPT_DIR, 'User')
+THIS_DOLPHIN_INI = os.path.join(os.path.join(THIS_USER_DIR, "Config"), 'Dolphin.ini')
+THIS_GFX_INI = os.path.join(os.path.join(THIS_USER_DIR, "Config"), 'GFX.ini')
 COMM_FILE = os.path.join(SCRIPT_DIR, 'slippi-comm-{}.txt'.format(JOB_ID))
-AUDIO_IN_FILE = os.path.join(SCRIPT_DIR, 'audio-{}.audio'.format(JOB_ID))
-VIDEO_IN_FILE = os.path.join(SCRIPT_DIR, 'video-{}.video'.format(JOB_ID))
 
 class Config:
     def __init__(self):
         with open(THIS_CONFIG, 'r') as f:
             j = json.loads(f.read())
             self.melee_iso = os.path.expanduser(j['melee_iso'])
+            self.check_path(self.melee_iso)
             self.dolphin_dir = os.path.expanduser(j['dolphin_dir'])
+            self.check_path(self.dolphin_dir)
             self.ffmpeg = os.path.expanduser(j['ffmpeg'])
             self.remove_short = j['remove_short']
 
         if sys.platform == "win32":
-            self.dolphin_bin = str(Path(self.dolphin_dir, 'Dolphin'))
+            self.dolphin_bin = str(Path(self.dolphin_dir, 'Dolphin.exe'))
         else:
             self.dolphin_bin = str(Path(self.dolphin_dir, 'dolphin-emu'))
-        self.render_time_file = str(Path(self.dolphin_dir, 'User', 'Logs', 'render_time.txt'))
-        self.dump_dir = str(Path(self.dolphin_dir, 'User', 'Dump'))
+        self.render_time_file = str(Path(THIS_USER_DIR, 'Logs', 'render_time.txt'))
+        self.dump_dir = str(Path(THIS_USER_DIR, 'Dump'))
+        self.check_path(self.ffmpeg)
+        self.check_path(self.dolphin_bin)
         self.frames_dir = str(Path(self.dump_dir, 'Frames'))
         self.audio_dir = str(Path(self.dump_dir, 'Audio'))
         self.video_file0 = str(Path(self.frames_dir, 'framedump0.avi'))
         self.video_file1 = str(Path(self.frames_dir, 'framedump1.avi'))
         self.audio_file = str(Path(self.audio_dir, 'dspdump.wav'))
+
+    def check_path(self, path):
+        if not os.path.exists(path):
+            raise RuntimeError("{} does not exist".format(path))
 
 def recursive_overwrite(src, dest, ignore=None):
     if os.path.isdir(src):
@@ -131,11 +141,11 @@ def installDependencies():
             shutil.rmtree(FM_WIN_PLAYBACK_CONFIG_FOLDER)
 
             # Overwrite GFX and Dolphin ini from slp-to-mp4
-            shutil.copy2(THIS_GFX_INI, os.path.join(os.path.join(os.path.join(FM_WIN_FOLDER, "User"), "Config"), "GFX.ini"))
-            shutil.copy2(THIS_DOLPHIN_INI, os.path.join(os.path.join(os.path.join(FM_WIN_FOLDER, "User"), "Config"), "Dolphin.ini"))
+            recursive_overwrite(THIS_USER_DIR, os.path.join(FM_WIN_FOLDER, "User"))
+            recursive_overwrite(os.path.join(FM_WIN_FOLDER, "User"), THIS_USER_DIR)
 
             # Create the frames folder that dolphin dumps. Dolphin will not dump frames without this
-            os.makedirs(os.path.join(os.path.join(os.path.join(FM_WIN_FOLDER, "User"), "Dump"), "Frames"))
+            os.makedirs(os.path.join(os.path.join(THIS_USER_DIR, "Dump"), "Frames"))
 
             # Create a file to indicate that dependencies are installed and should not be reinstalled
             with open("installed", 'a'):
@@ -158,7 +168,7 @@ def main():
 
     # Some basic checks before continuing
 
-    if not (os.path.exists(THIS_CONFIG) and os.path.exists(THIS_DOLPHIN_INI) and os.path.exists(THIS_GFX_INI)):
+    if not (os.path.exists(THIS_CONFIG) and os.path.exists(THIS_USER_DIR)):
         print(USAGE)
         sys.exit()
 
@@ -209,10 +219,14 @@ def main():
 
     # Remove existing dump files
     print("Removing", conf.dump_dir)
-    for path in os.listdir(conf.dump_dir):
-        shutil.rmtree(path, ignore_errors=True)
+    if os.path.exists(conf.dump_dir):
+        shutil.rmtree(conf.dump_dir, ignore_errors=True)
 
-    # TODO Dolphin.ini, GFX.ini stuff
+    # We have to create 'Frames' and 'Audio' because reasons
+    # See Dolphin source: Source/Core/VideoCommon/AVIDump.cpp:AVIDump:CreateVideoFile() - it doesn't create the thing
+    # TODO: patch Dolphin I guess
+    os.makedirs(conf.frames_dir, exist_ok=True)
+    os.makedirs(conf.audio_dir, exist_ok=True)
 
     # Create a slippi 'comm' file to tell dolphin which file to play
     comm_data = {
@@ -233,7 +247,8 @@ def main():
         conf.dolphin_bin,
         '-i', COMM_FILE,        # The comm file tells dolphin which slippi file to play (see above)
         '-b',                   # Exit dolphin when emulation ends
-        '-e', conf.melee_iso    # ISO to use
+        '-e', conf.melee_iso,   # ISO to use
+        '-u', THIS_USER_DIR     # Custom User directory so we don't have to copy config files
         ]
     print(' '.join(cmd))
     # TODO run faster than realtime if possible
@@ -245,6 +260,9 @@ def main():
     while count_frames_completed(conf) < num_frames:
         if time.perf_counter() - start_timer > MAX_WAIT_SECONDS:
             raise RuntimeError("Timed out waiting for render")
+        if proc_dolphin.poll() is not None:
+            print("WARNING: Dolphin exited before replay finished - may not have recorded entire replay")
+            break
         time.sleep(1)
 
     # Kill dolphin
@@ -258,25 +276,26 @@ def main():
     # ####################################################
     # Encode
 
-    # Move audio and video files to cwd
     if not os.path.exists(conf.audio_file):
         raise RuntimeError("Audio dump missing!")
+
     if not os.path.exists(conf.video_file1):
         if not os.path.exists(conf.video_file0):
             raise RuntimeError("Frame dump missing!")
-        shutil.move(conf.video_file0, VIDEO_IN_FILE)
+        video_file = conf.video_file0
     else:
-        shutil.move(conf.video_file1, VIDEO_IN_FILE)
-    shutil.move(conf.audio_file, AUDIO_IN_FILE)
+        video_file = conf.video_file1
+    audio_file = conf.audio_file
+
 
 
     # Convert audio and video to video
     cmd = [
         conf.ffmpeg,
         '-y',                   # overwrite output file without asking
-        '-i', AUDIO_IN_FILE,    # 0th input stream: audio
+        '-i', audio_file,  # 0th input stream: audio
         '-itsoffset', '1.55',   # offset (delay) the audio by 1.55s
-        '-i', VIDEO_IN_FILE,    # 1st input stream: video
+        '-i', video_file,  # 1st input stream: video
         '-map', '1:v',          # map 1st input to video output
         '-map', '0:a',          # map 0th input to audio output
         '-c:a', 'mp3',          # convert audio encoding to mp3 for output
@@ -287,8 +306,6 @@ def main():
     proc_ffmpeg = subprocess.Popen(args=cmd)
     proc_ffmpeg.wait()
 
-    os.remove(AUDIO_IN_FILE)
-    os.remove(VIDEO_IN_FILE)
     os.remove(COMM_FILE)
 
     print('Created {}'.format(outfile))

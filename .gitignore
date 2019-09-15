@@ -10,3 +10,18 @@ installed
 FM-v*
 slippi-r18-playback*
 ffmpeg*
+
+# Unneeded User/ directories
+User/Dump
+User/Config/Profiles
+User/Shaders
+User/Cache
+User/GC
+User/Load
+User/Logs
+User/Maps
+User/ScreenShots
+User/Shaders
+User/StateSaves
+User/Themes
+User/Wii

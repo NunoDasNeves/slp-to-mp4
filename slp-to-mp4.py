@@ -49,8 +49,8 @@ if sys.platform == "win32":
 else:
     THIS_CONFIG = os.path.join(SCRIPT_DIR, 'config.json')
 THIS_USER_DIR = os.path.join(SCRIPT_DIR, 'User')
-THIS_DOLPHIN_INI = os.path.join(os.path.join(THIS_USER_DIR, "Config"), 'Dolphin.ini')
-THIS_GFX_INI = os.path.join(os.path.join(THIS_USER_DIR, "Config"), 'GFX.ini')
+THIS_DOLPHIN_INI = os.path.join(THIS_USER_DIR, "Config", 'Dolphin.ini')
+THIS_GFX_INI = os.path.join(THIS_USER_DIR, "Config", 'GFX.ini')
 COMM_FILE = os.path.join(SCRIPT_DIR, 'slippi-comm-{}.txt'.format(JOB_ID))
 
 class Config:
@@ -145,7 +145,8 @@ def installDependencies():
             recursive_overwrite(os.path.join(FM_WIN_FOLDER, "User"), THIS_USER_DIR)
 
             # Create the frames folder that dolphin dumps. Dolphin will not dump frames without this
-            os.makedirs(os.path.join(os.path.join(THIS_USER_DIR, "Dump"), "Frames"))
+            if not os.path.isdir(os.path.join(THIS_USER_DIR, "Dump", "Frames")):
+                os.makedirs(os.path.join(THIS_USER_DIR, "Dump", "Frames"))
 
             # Create a file to indicate that dependencies are installed and should not be reinstalled
             with open("installed", 'a'):

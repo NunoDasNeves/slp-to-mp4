@@ -1,0 +1,6 @@
+{
+    "melee_iso": "SSBMelee.iso",
+    "dolphin_dir": "FM-v5.9-Slippi-r18-Win",
+    "ffmpeg": "ffmpeg-20190914-8efc9fc-win64-static/bin/ffmpeg.exe",
+    "remove_short": true
+}

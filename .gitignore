@@ -2,6 +2,14 @@ slippi-com*.txt
 *.mp4
 *.audio
 *.video
+*.slp
+*.iso
+*.exe
+.idea/
+installed
+FM-v*
+slippi-r18-playback*
+ffmpeg*
 
 # Unneeded User/ directories
 User/Dump
@@ -17,4 +25,3 @@ User/Shaders
 User/StateSaves
 User/Themes
 User/Wii
-

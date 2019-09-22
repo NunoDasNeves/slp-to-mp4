@@ -75,8 +75,6 @@ def main():
         outfile += '.mp4'
 
     conf = Config()
-    dolphin_runner = DolphinRunner(conf, THIS_USER_DIR, SCRIPT_DIR, JOB_ID)
-    ffmpeg_runner = FfmpegRunner(conf.ffmpeg)
 
     # Parse file with py-slippi to determine number of frames
     slippi_game = Game(slp_file)
@@ -87,12 +85,14 @@ def main():
         return
 
     # Dump frames
-    video_file, audio_file = dolphin_runner.run(slp_file, num_frames)
+    with DolphinRunner(conf, THIS_USER_DIR, SCRIPT_DIR, JOB_ID) as dolphin_runner:
+        video_file, audio_file = dolphin_runner.run(slp_file, num_frames)
 
-    # Encode
-    ffmpeg_runner.run(video_file, audio_file, outfile)
+        # Encode
+        ffmpeg_runner = FfmpegRunner(conf.ffmpeg)
+        ffmpeg_runner.run(video_file, audio_file, outfile)
 
-    print('Created {}'.format(outfile))
+        print('Created {}'.format(outfile))
 
 if __name__ == '__main__':
     installDependencies()

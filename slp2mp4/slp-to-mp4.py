@@ -6,6 +6,7 @@ import urllib.request
 from io import BytesIO
 from zipfile import ZipFile
 import tarfile
+from config import Config
 
 VERSION = '1.0.0'
 USAGE = """\
@@ -43,7 +44,7 @@ FM_WIN_URL = "https://www.smashladder.com/download/dolphin/18/Project+Slippi+%28
 FM_WIN_PLAYBACK_CONFIG_URL = "https://github.com/project-slippi/Slippi-FM-installer/raw/8bef9c897cbde8bad0ef7afbcb5ada4ab1e6dd94/" + FM_WIN_PLAYBACK_CONFIG_FOLDER + ".tar.gz"
 
 # Paths to files in (this) script's directory
-SCRIPT_DIR, _ = os.path.split(os.path.abspath(sys.argv[0]))
+SCRIPT_DIR, _ = os.path.split(os.path.abspath(__file__))
 if sys.platform == "win32":
     THIS_CONFIG = os.path.join(SCRIPT_DIR, 'config_windows.json')
 else:
@@ -52,35 +53,6 @@ THIS_USER_DIR = os.path.join(SCRIPT_DIR, 'User')
 THIS_DOLPHIN_INI = os.path.join(THIS_USER_DIR, "Config", 'Dolphin.ini')
 THIS_GFX_INI = os.path.join(THIS_USER_DIR, "Config", 'GFX.ini')
 COMM_FILE = os.path.join(SCRIPT_DIR, 'slippi-comm-{}.txt'.format(JOB_ID))
-
-class Config:
-    def __init__(self):
-        with open(THIS_CONFIG, 'r') as f:
-            j = json.loads(f.read())
-            self.melee_iso = os.path.expanduser(j['melee_iso'])
-            self.check_path(self.melee_iso)
-            self.dolphin_dir = os.path.expanduser(j['dolphin_dir'])
-            self.check_path(self.dolphin_dir)
-            self.ffmpeg = os.path.expanduser(j['ffmpeg'])
-            self.remove_short = j['remove_short']
-
-        if sys.platform == "win32":
-            self.dolphin_bin = str(Path(self.dolphin_dir, 'Dolphin.exe'))
-        else:
-            self.dolphin_bin = str(Path(self.dolphin_dir, 'dolphin-emu'))
-        self.render_time_file = str(Path(THIS_USER_DIR, 'Logs', 'render_time.txt'))
-        self.dump_dir = str(Path(THIS_USER_DIR, 'Dump'))
-        self.check_path(self.ffmpeg)
-        self.check_path(self.dolphin_bin)
-        self.frames_dir = str(Path(self.dump_dir, 'Frames'))
-        self.audio_dir = str(Path(self.dump_dir, 'Audio'))
-        self.video_file0 = str(Path(self.frames_dir, 'framedump0.avi'))
-        self.video_file1 = str(Path(self.frames_dir, 'framedump1.avi'))
-        self.audio_file = str(Path(self.audio_dir, 'dspdump.wav'))
-
-    def check_path(self, path):
-        if not os.path.exists(path):
-            raise RuntimeError("{} does not exist".format(path))
 
 def recursive_overwrite(src, dest, ignore=None):
     if os.path.isdir(src):
@@ -166,12 +138,6 @@ def count_frames_completed(conf):
     return num_completed
 
 def main():
-
-    # Some basic checks before continuing
-
-    if not (os.path.exists(THIS_CONFIG) and os.path.exists(THIS_USER_DIR)):
-        print(USAGE)
-        sys.exit()
 
     # Parse arguments
 

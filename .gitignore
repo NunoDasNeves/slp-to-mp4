@@ -11,6 +11,8 @@ FM-v*
 slippi-r18-playback*
 ffmpeg*
 
+__pycache__
+
 # Unneeded User/ directories
 User/Dump
 User/Config/Profiles

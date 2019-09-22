@@ -10,8 +10,6 @@ else:
     DOLPHIN_NAME = 'dolphin-emu'
 
 THIS_USER_DIR = os.path.join(THIS_DIR, 'User')
-THIS_DOLPHIN_INI = os.path.join(THIS_USER_DIR, "Config", 'Dolphin.ini')
-THIS_GFX_INI = os.path.join(THIS_USER_DIR, "Config", 'GFX.ini')
 
 class Config:
     def __init__(self):

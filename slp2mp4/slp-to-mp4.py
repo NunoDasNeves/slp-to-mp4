@@ -50,8 +50,6 @@ if sys.platform == "win32":
 else:
     THIS_CONFIG = os.path.join(SCRIPT_DIR, 'config.json')
 THIS_USER_DIR = os.path.join(SCRIPT_DIR, 'User')
-THIS_DOLPHIN_INI = os.path.join(THIS_USER_DIR, "Config", 'Dolphin.ini')
-THIS_GFX_INI = os.path.join(THIS_USER_DIR, "Config", 'GFX.ini')
 COMM_FILE = os.path.join(SCRIPT_DIR, 'slippi-comm-{}.txt'.format(JOB_ID))
 
 def recursive_overwrite(src, dest, ignore=None):

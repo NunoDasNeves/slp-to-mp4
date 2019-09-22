@@ -8,7 +8,7 @@ slippi-com*.txt
 installed
 FM-v*
 slippi-r18-playback*
-ffmpeg*
+ffmpeg-*
 
 __pycache__
 

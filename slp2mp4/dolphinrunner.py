@@ -1,5 +1,4 @@
 import os, sys, subprocess, time, shutil, uuid, json
-from config import Config
 
 MAX_WAIT_SECONDS = 8 * 60 + 10
 
@@ -91,6 +90,8 @@ class DolphinRunner:
         except subprocess.TimeoutExpired as t:
             print ("Warning: timed out waiting for Dolphin to terminate")
             proc_dolphin.kill()
+
+        os.remove(self.comm_file)
 
         # Find correct audio and video files
         if not os.path.exists(self.audio_file):

@@ -20,6 +20,7 @@ class Config:
             self.ffmpeg = os.path.expanduser(j['ffmpeg'])
             self.check_path(self.ffmpeg)
             self.remove_short = j['remove_short']
+            self.combine = j['combine']
 
         self.dolphin_bin = os.path.join(self.dolphin_dir, DOLPHIN_NAME)
         self.check_path(self.dolphin_bin)

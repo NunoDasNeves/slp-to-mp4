@@ -46,8 +46,14 @@ Copy your Super Smash Bros. Melee v1.02 NTSC ISO to SSBMelee.iso in this directo
 ```
 slp-to-mp4.py REPLAY_FILE [OUTPUT_FILE_OR_DIRECTORY]
 ```
+or
+```
+slp-to-mp4.py DIRECTORY_WITH_SLP_REPLAYS
+```
 This launches Dolphin, which plays the replay and dumps frames and audio.  
 Then ffmpeg is invoked to combine audio and video.  
+
+If the output file is unspecified, the file will be placed in slp2mp4/out/ and the file name will be the name of the parent directory of the slp file.
 
 ## Future work
 - Batch jobs - encode multiple replays at a time (maybe a separate script should do this)

@@ -58,7 +58,7 @@ def record_file_slp(slp_file, outfile):
     slippi_game = Game(slp_file)
     num_frames = slippi_game.metadata.duration + DURATION_BUFFER
 
-    if is_game_too_short(num_frames, conf.remove_short):
+    if is_game_too_short(slippi_game.metadata.duration, conf.remove_short):
         print("Warning: Game is less than 30 seconds and won't be recorded. Override in config.")
         return
 
@@ -74,9 +74,7 @@ def record_file_slp(slp_file, outfile):
 
 
 def combine(conf):
-    if not conf.combine:
-        return
-    for subdir, dirs, files in os.walk(OUT_DIR):
+    for subdir, dirs, files in os.walk(OUT_DIR, topdown=False):
         basedir = os.path.basename(subdir)
         if os.path.exists(os.path.join(subdir, 'concat_file.txt')):
             os.remove(os.path.join(subdir, 'concat_file.txt'))
@@ -85,7 +83,7 @@ def combine(conf):
             lines = []
             for file in files:
                 try:
-                    if file.split('.')[-1] == 'mp4' and os.path.join(subdir, file) not in combined_files:
+                    if file.endswith('.mp4') and os.path.join(subdir, file) not in combined_files:
                         file_count = file_count + 1
                         lines.append("file \'" + os.path.join(subdir, file) + "\'" + "\n")
                 except Exception:
@@ -106,7 +104,7 @@ def record_folder_slp(slp_folder, conf):
     out_files = []
     for subdir, dirs, files in os.walk(slp_folder):
         for file in files:
-            if file.split('.')[-1] == 'slp':
+            if file.endswith('.slp'):
                 in_files.append([subdir, file])
                 out_files.append([os.path.basename(subdir), str(file.split('.')[:-1][0]) + '.mp4'])
 
@@ -115,7 +113,8 @@ def record_folder_slp(slp_folder, conf):
     last_dir = out_files[0][0]
     for index, in_file in enumerate(in_files):
         if out_files[index][0] != last_dir:
-            combine(conf)
+            if conf.combine:
+                combine(conf)
             last_dir = out_files[index][0]
         if not os.path.isdir(os.path.join(OUT_DIR, out_files[index][0])):
             os.makedirs(os.path.join(OUT_DIR, out_files[index][0]))
@@ -123,7 +122,8 @@ def record_folder_slp(slp_folder, conf):
         out_file = os.path.join(OUT_DIR, out_files[index][0], out_files[index][1])
         if not os.path.exists(out_file):
             record_file_slp(slp_file, out_file)
-    combine(conf)
+    if conf.combine:
+        combine(conf)
 
 
 def main():

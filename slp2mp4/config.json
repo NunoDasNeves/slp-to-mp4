@@ -2,5 +2,6 @@
     "melee_iso": "~/Games/SSBM-v1.02-NTSC.iso",
     "dolphin_dir": "~/dolphin/Slippi-FM-r18/playback",
     "ffmpeg": "/usr/bin/ffmpeg",
-    "remove_short": true
+    "remove_short": true,
+    "combine": true
 }

@@ -41,9 +41,7 @@ def patch_dolphin_sys_game_settings():
     gal_ini_parser = configparser.ConfigParser()
     gal_ini_parser.optionxform = str
     gal_ini_parser.read(gal_ini)
-    print(gal_ini_parser._sections)
     gal_ini_parser.remove_option('Video_Settings', 'EFBScale')
-    print(gal_ini_parser._sections)
     gal_ini_fp = open(gal_ini, 'w')
     gal_ini_parser.write(gal_ini_fp)
     gal_ini_fp.close()
@@ -97,9 +95,6 @@ def installDependencies():
             # Create the frames folder that dolphin dumps. Dolphin will not dump frames without this
             if not os.path.isdir(os.path.join(THIS_USER_DIR, "Dump", "Frames")):
                 os.makedirs(os.path.join(THIS_USER_DIR, "Dump", "Frames"))
-
-            # Patch Dolphin's GAL.ini to allow selection of resolution from GFX.ini
-            patch_dolphin_sys_game_settings()
 
             # Create a file to indicate that dependencies are installed and should not be reinstalled
             with open("installed", 'a'):

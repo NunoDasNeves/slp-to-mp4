@@ -19,6 +19,10 @@ class Config:
             self.check_path(self.dolphin_dir)
             self.ffmpeg = os.path.expanduser(j['ffmpeg'])
             self.check_path(self.ffmpeg)
+            self.resolution = j['resolution']
+            self.widescreen = j['widescreen']
+            self.bitrateKbps = j['bitrateKbps']
+            self.parallel_games = j['parallel_games']
             self.remove_short = j['remove_short']
             self.combine = j['combine']
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, sys, json, subprocess, time, shutil, uuid
+import os, sys, json, subprocess, time, shutil, uuid, multiprocessing, psutil, glob
 from pathlib import Path
 from slippi import Game
 from config import Config
@@ -50,6 +50,19 @@ combined_files = []
 def is_game_too_short(num_frames, remove_short):
     return num_frames < MIN_GAME_LENGTH and remove_short
 
+
+def get_num_processes(conf):
+    if conf.parallel_games == "recommended":
+        return psutil.cpu_count(logical=False)
+    else:
+        return int(conf.parallel_games)
+
+
+def clean():
+    for folder in glob.glob("User-*"):
+        shutil.rmtree(folder)
+    for file in glob.glob("slippi-comm-*"):
+        os.remove(file)
 
 # Evaluate whether file should be run. The open in dolphin and combine video and audio with ffmpeg.
 def record_file_slp(slp_file, outfile):
@@ -129,12 +142,15 @@ def record_folder_slp(slp_folder, conf):
     if len(out_files) == 0:
         RuntimeError("No slp files in folder!")
     last_dir = out_files[0][0]
+    args = []
     for index, in_file in enumerate(in_files):
 
         # Combine last subdirectory on discovery of a new subdirectory
         if out_files[index][0] != last_dir:
             if conf.combine:
-                combine(conf)
+                #combine(conf)
+                # TODO: Find a way to fix combining folders while still multiprocessing
+                pass
             last_dir = out_files[index][0]
 
         # Make the needed directory in the output
@@ -145,7 +161,13 @@ def record_folder_slp(slp_folder, conf):
         slp_file = os.path.join(in_file[0], in_file[1])
         out_file = os.path.join(OUT_DIR, out_files[index][0], out_files[index][1])
         if not os.path.exists(out_file):
-            record_file_slp(slp_file, out_file)
+            args.append((slp_file, out_file))
+
+    num_processes = get_num_processes(conf)
+
+    pool = multiprocessing.Pool(processes=num_processes)
+    pool.starmap(record_file_slp, args)
+    pool.close()
 
     # Combine one last time
     if conf.combine:
@@ -193,4 +215,5 @@ def main():
 
 if __name__ == '__main__':
     installDependencies()
+    clean()
     main()

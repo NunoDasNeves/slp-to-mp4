@@ -19,6 +19,9 @@ https://www.smashladder.com/download/dolphin/18/Project+Slippi+%28r18%29
 py-slippi for parsing the slippi file (pip install)  
 https://github.com/hohav/py-slippi
 
+psutil for finding number of physical cores
+https://github.com/giampaolo/psutil
+
 A Super Smash Bros. Melee v1.02 NTSC ISO.
 
 ### Windows
@@ -28,6 +31,9 @@ https://www.python.org/downloads/
 
 py-slippi for parsing the slippi file (pip install)  
 https://github.com/hohav/py-slippi
+
+psutil for finding number of physical cores
+https://github.com/giampaolo/psutil
 
 A Super Smash Bros. Melee v1.02 NTSC ISO.
 
@@ -83,6 +89,14 @@ gives
 slp2mp4/out/Name_Of_Event.mp4
 slp2mp4/out/Set_A.mp4
 ```
+
+## Performance
+Resolution, widescreen, bitrate, and the number of parallel games will all affect performance. Dolphin will not record well (skips additional frames) when running less than or greater than 60 FPS. It becomes noticeable below 58 FPS. YouTube requires a resolution of at least 720p to upload a 60 FPS video, so it should be a goal to run at that resolution or higher. A higher bitrate will come with better video quality but larger file size and worse performance because dolphin has more to encode. The number of parallel games will have the largest effect on performance. The 'recommended' value is the number of physical cpu cores, but greater or fewer parallel games may be optimal.
+
 ## Future work
-- Batch jobs - encode multiple replays at a time (maybe a separate script should do this)
+- Multiprocessing
+  - Allow combining after all required files are done recording while multiprocessing
+  - Better progress reporting
+  - Warning on completion if average runtime frame rate is below 58 fps
 - Run Dolphin at higher emulation speed if possible
+- GUI

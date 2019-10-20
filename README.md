@@ -90,6 +90,22 @@ slp2mp4/out/Name_Of_Event.mp4
 slp2mp4/out/Set_A.mp4
 ```
 
+## Configuration
+For linux, the configuration file is config.json. For Windows, the file is config_windows.json. 
+- 'melee_iso' is the path to your Super Smash Bros. Melee 1.02 ISO. 
+- 'dolphin_dir' and 'ffmpeg' in linux need to be set to the playback path in the installed version of dolphin, and the default installed path of ffmpeg. In windows, these dependencies are downloaded and installed in the local directory so there is no need to change the paths
+- 'resolution' can be set to the following. The output resolution is the minimum resolution dolphin can run above the resolution in this configuration.
+  - 480p
+  - 720p
+  - 1080p
+  - 1440p
+  - 2160p
+- 'widescreen' can be true or false. Enabling will set the resolution to 16:9
+- 'bitrateKbps' must be a number. It selects the bitrate in Kilobits per second that dolphin records at.
+- 'parallel_games' must be a number greater than 0 or "recommended". This is the maximum number of games that will run at the same time. "recommended" will select the number of physical cores in the CPU.
+- 'remove_short' can be true or false. Enabling will not record games less than 30 seconds. Most games less than 30 seconds are handwarmers, so it can save time not to record them.
+- 'combine': can be true or false, and matters only when recording a folder of .slp files. If false, the .mp4 files will be left in their subfolders in the output folder. If true, each subfolder of .mp4 files will be combined into .mp4 files in the output folder.
+
 ## Performance
 Resolution, widescreen, bitrate, and the number of parallel games will all affect performance. Dolphin will not record well (skips additional frames) when running less than or greater than 60 FPS. It becomes noticeable below 58 FPS. YouTube requires a resolution of at least 720p to upload a 60 FPS video, so it should be a goal to run at that resolution or higher. A higher bitrate will come with better video quality but larger file size and worse performance because dolphin has more to encode. The number of parallel games will have the largest effect on performance. The 'recommended' value is the number of physical cpu cores, but greater or fewer parallel games may be optimal.
 

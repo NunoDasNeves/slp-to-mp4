@@ -35,9 +35,9 @@ def recursive_overwrite(src, dest, ignore=None):
         shutil.copyfile(src, dest)
 
 
-def patch_dolphin_sys_game_settings():
+def patch_dolphin_sys_game_settings(conf):
     # Remove efb_scale field. This allows selection of resolution options from GFX.ini.
-    gal_ini = os.path.join(FM_WIN_FOLDER, "Sys", "GameSettings", "GAL.ini")
+    gal_ini = os.path.join(conf.dolphin_dir, "Sys", "GameSettings", "GAL.ini")
     gal_ini_parser = configparser.ConfigParser()
     gal_ini_parser.optionxform = str
     gal_ini_parser.read(gal_ini)

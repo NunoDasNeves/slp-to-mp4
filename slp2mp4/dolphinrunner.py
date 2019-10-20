@@ -1,6 +1,6 @@
 import os, sys, subprocess, time, shutil, uuid, json, configparser
 
-MAX_WAIT_SECONDS = 8 * 60 + 10
+MAX_WAIT_SECONDS = 8 * 60 + 30
 RESOLUTION_DICT = {'480p': '2', '720p': '3', '1080p': '5', '1440p': '6', '2160p': '8'}
 
 class CommFile:
@@ -78,6 +78,9 @@ class DolphinRunner:
         gfx_ini_parser.set('Settings', 'EFBScale', efb_scale)
         if self.conf.widescreen:
             gfx_ini_parser.set('Settings', 'AspectRatio', "6")
+
+            # append this to the file to enable the gecko code instead of using configparser
+            # because configparser doesn't like '$'s.
             with open(os.path.join(self.user_dir, "GameSettings", "GALE01.ini"), "a") as game_settings_file:
                 game_settings_file.write("\n$Widescreen 16:9")
         gfx_ini_parser.set('Settings', 'BitrateKbps', str(self.conf.bitrateKbps))
@@ -146,7 +149,8 @@ class DolphinRunner:
             while self.count_frames_completed() < num_frames:
 
                 if time.perf_counter() - start_timer > MAX_WAIT_SECONDS:
-                    raise RuntimeError("Timed out waiting for render")
+                    print("WARNING: Timed out waiting for render")
+                    break
 
                 if proc_dolphin.poll() is not None:
                     print("WARNING: Dolphin exited before replay finished - may not have recorded entire replay")

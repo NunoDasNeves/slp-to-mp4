@@ -32,7 +32,6 @@ See README.md for details
 FPS = 60
 MIN_GAME_LENGTH = 30 * FPS
 DURATION_BUFFER = 70              # Record for 70 additional frames
-JOB_ID = uuid.uuid4()
 
 # Paths to files in (this) script's directory
 SCRIPT_DIR, _ = os.path.split(os.path.abspath(__file__))
@@ -77,7 +76,7 @@ def record_file_slp(slp_file, outfile):
         return
 
     # Dump frames
-    with DolphinRunner(conf, THIS_USER_DIR, SCRIPT_DIR, JOB_ID) as dolphin_runner:
+    with DolphinRunner(conf, THIS_USER_DIR, SCRIPT_DIR, uuid.uuid4()) as dolphin_runner:
         video_file, audio_file = dolphin_runner.run(slp_file, num_frames)
 
         # Encode
@@ -183,6 +182,9 @@ def main():
         sys.exit()
 
     slp_file = os.path.abspath(sys.argv[1])
+    installDependencies()
+    patch_dolphin_sys_game_settings(Config())
+    clean()
     os.makedirs(OUT_DIR, exist_ok=True)
 
     # Handle all the outfile argument possibilities
@@ -214,7 +216,4 @@ def main():
 
 
 if __name__ == '__main__':
-    installDependencies()
-    patch_dolphin_sys_game_settings()
-    clean()
     main()

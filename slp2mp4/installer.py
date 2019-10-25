@@ -3,6 +3,7 @@ import urllib.request
 from io import BytesIO
 from zipfile import ZipFile
 import tarfile
+import configparser
 
 THIS_DIR, _ = os.path.split(os.path.abspath(__file__))
 THIS_USER_DIR = os.path.join(THIS_DIR, 'User')
@@ -14,6 +15,7 @@ FM_WIN_FOLDER = "FM-v5.9-Slippi-r18-Win"
 FM_WIN_PLAYBACK_CONFIG_FOLDER = "slippi-r18-playback-config"
 FM_WIN_URL = "https://www.smashladder.com/download/dolphin/18/Project+Slippi+%28r18%29/windows/32/" + FM_WIN_FOLDER + ".zip"
 FM_WIN_PLAYBACK_CONFIG_URL = "https://github.com/project-slippi/Slippi-FM-installer/raw/8bef9c897cbde8bad0ef7afbcb5ada4ab1e6dd94/" + FM_WIN_PLAYBACK_CONFIG_FOLDER + ".tar.gz"
+
 
 def recursive_overwrite(src, dest, ignore=None):
     if os.path.isdir(src):
@@ -31,6 +33,19 @@ def recursive_overwrite(src, dest, ignore=None):
                                     ignore)
     else:
         shutil.copyfile(src, dest)
+
+
+def patch_dolphin_sys_game_settings(conf):
+    # Remove efb_scale field. This allows selection of resolution options from GFX.ini.
+    gal_ini = os.path.join(conf.dolphin_dir, "Sys", "GameSettings", "GAL.ini")
+    gal_ini_parser = configparser.ConfigParser()
+    gal_ini_parser.optionxform = str
+    gal_ini_parser.read(gal_ini)
+    gal_ini_parser.remove_option('Video_Settings', 'EFBScale')
+    gal_ini_fp = open(gal_ini, 'w')
+    gal_ini_parser.write(gal_ini_fp)
+    gal_ini_fp.close()
+
 
 def installDependencies():
     if sys.platform == "win32":
@@ -84,4 +99,3 @@ def installDependencies():
             # Create a file to indicate that dependencies are installed and should not be reinstalled
             with open("installed", 'a'):
                 os.utime("installed", None)
-

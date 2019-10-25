@@ -2,6 +2,10 @@
     "melee_iso": "SSBMelee.iso",
     "dolphin_dir": "FM-v5.9-Slippi-r18-Win",
     "ffmpeg": "ffmpeg-20190914-8efc9fc-win64-static/bin/ffmpeg.exe",
+    "resolution": "720p",
+    "widescreen": true,
+    "bitrateKbps": 16000,
+    "parallel_games": "recommended",
     "remove_short": true,
     "combine": true
 }

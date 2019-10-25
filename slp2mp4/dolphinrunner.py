@@ -1,6 +1,7 @@
-import os, sys, subprocess, time, shutil, uuid, json
+import os, sys, subprocess, time, shutil, uuid, json, configparser
 
-MAX_WAIT_SECONDS = 8 * 60 + 10
+MAX_WAIT_SECONDS = 8 * 60 + 30
+RESOLUTION_DICT = {'480p': '2', '720p': '3', '1080p': '5', '1440p': '6', '2160p': '8'}
 
 class CommFile:
     def __init__(self, comm_path, slp_file, job_id):
@@ -61,6 +62,32 @@ class DolphinRunner:
         print("Rendered ",num_completed," frames")
         return num_completed
 
+    def prep_dolphin_settings(self):
+        # Determine efb_scale value from resolution field in config
+        if self.conf.resolution not in RESOLUTION_DICT:
+            print("WARNING: configured resolution is not valid, using 480p")
+            efb_scale = RESOLUTION_DICT["480p"]
+        else:
+            efb_scale = RESOLUTION_DICT[self.conf.resolution]
+
+        # Apply graphics settings
+        gfx_ini = os.path.join(self.user_dir, "Config", "GFX.ini")
+        gfx_ini_parser = configparser.ConfigParser()
+        gfx_ini_parser.optionxform = str
+        gfx_ini_parser.read(gfx_ini)
+        gfx_ini_parser.set('Settings', 'EFBScale', efb_scale)
+        if self.conf.widescreen:
+            gfx_ini_parser.set('Settings', 'AspectRatio', "6")
+
+            # append this to the file to enable the gecko code instead of using configparser
+            # because configparser doesn't like '$'s.
+            with open(os.path.join(self.user_dir, "GameSettings", "GALE01.ini"), "a") as game_settings_file:
+                game_settings_file.write("\n$Widescreen 16:9")
+        gfx_ini_parser.set('Settings', 'BitrateKbps', str(self.conf.bitrateKbps))
+        gfx_ini_fp = open(gfx_ini, 'w')
+        gfx_ini_parser.write(gfx_ini_fp)
+        gfx_ini_fp.close()
+
     def prep_user_dir(self):
         # We need to remove the render time file because we read it to figure out when dolphin is done
         if os.path.exists(self.render_time_file):
@@ -99,6 +126,7 @@ class DolphinRunner:
         Returns path_of_video_file, path_of_audio_file
         """
 
+        self.prep_dolphin_settings()
         self.prep_user_dir()
 
         # Create a slippi 'comm' file to tell dolphin which file to play
@@ -121,7 +149,8 @@ class DolphinRunner:
             while self.count_frames_completed() < num_frames:
 
                 if time.perf_counter() - start_timer > MAX_WAIT_SECONDS:
-                    raise RuntimeError("Timed out waiting for render")
+                    print("WARNING: Timed out waiting for render")
+                    break
 
                 if proc_dolphin.poll() is not None:
                     print("WARNING: Dolphin exited before replay finished - may not have recorded entire replay")

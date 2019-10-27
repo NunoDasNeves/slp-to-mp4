@@ -88,6 +88,20 @@ class DolphinRunner:
         gfx_ini_parser.write(gfx_ini_fp)
         gfx_ini_fp.close()
 
+        # Apply dolphin settings
+        dolphin_ini = os.path.join(self.user_dir, "Config", "Dolphin.ini")
+        dolphin_ini_parser = configparser.ConfigParser()
+        dolphin_ini_parser.optionxform = str
+        dolphin_ini_parser.read(dolphin_ini)
+
+        # If using windows, run all of dolphin in the main window to keep the display cleaner. This breaks in Linux.
+        if sys.platform == "win32":
+            dolphin_ini_parser.set('Display', 'RenderToMain', "True")
+
+        dolphin_ini_fp = open(dolphin_ini, 'w')
+        dolphin_ini_parser.write(dolphin_ini_fp)
+        dolphin_ini_fp.close()
+
     def prep_user_dir(self):
         # We need to remove the render time file because we read it to figure out when dolphin is done
         if os.path.exists(self.render_time_file):

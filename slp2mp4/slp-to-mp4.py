@@ -3,7 +3,6 @@ import os, sys, json, subprocess, time, shutil, uuid, multiprocessing, psutil, g
 from pathlib import Path
 from slippi import Game
 from config import Config
-from installer import installDependencies, patch_dolphin_sys_game_settings
 from dolphinrunner import DolphinRunner
 from ffmpegrunner import FfmpegRunner
 
@@ -182,8 +181,6 @@ def main():
         sys.exit()
 
     slp_file = os.path.abspath(sys.argv[1])
-    installDependencies()
-    patch_dolphin_sys_game_settings(Config())
     clean()
     os.makedirs(OUT_DIR, exist_ok=True)
 

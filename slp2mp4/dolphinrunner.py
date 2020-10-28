@@ -63,6 +63,20 @@ class DolphinRunner:
         return num_completed
 
     def prep_dolphin_settings(self):
+
+        # TODO should we do this (do we need it)? Can't specify separate Sys directory like we can with User...
+        '''
+        # Remove efb_scale field. This allows selection of resolution options from GFX.ini.
+        gal_ini = os.path.join(conf.dolphin_dir, "Sys", "GameSettings", "GAL.ini") # need to get sys dir in here
+        gal_ini_parser = configparser.ConfigParser()
+        gal_ini_parser.optionxform = str
+        gal_ini_parser.read(gal_ini)
+        gal_ini_parser.remove_option('Video_Settings', 'EFBScale')
+        gal_ini_fp = open(gal_ini, 'w')
+        gal_ini_parser.write(gal_ini_fp)
+        gal_ini_fp.close()
+        '''
+
         # Determine efb_scale value from resolution field in config
         if self.conf.resolution not in RESOLUTION_DICT:
             print("WARNING: configured resolution is not valid, using 480p")
@@ -75,7 +89,31 @@ class DolphinRunner:
         gfx_ini_parser = configparser.ConfigParser()
         gfx_ini_parser.optionxform = str
         gfx_ini_parser.read(gfx_ini)
-        gfx_ini_parser.set('Settings', 'EFBScale', efb_scale)
+
+        gfx_ini_settings = {
+            'Settings': [
+                ('EFBScale', efb_scale),
+
+                # for getting number of frames from file (to tell if we're done)
+                ('LogRenderTimeToFile','True'),
+
+                # maybe not needed? gives better quality i guess
+                ('DumpCodec', 'H264'),
+                ('BitrateKbps', str(self.conf.bitrateKbps)),
+                ('MSAA', '8'),
+                ('SSAA', 'True')
+            ],
+            'Enhancements': [
+                ('MaxAnisotropy', '4'),
+                ('TextureScalingType', '1'),
+                ('CompileShaderOnStartup', 'True')
+            ]
+        }
+
+        for section, opts in gfx_ini_settings.items():
+            for opt, val in opts:
+                gfx_ini_parser.set(section, opt, val)
+
         if self.conf.widescreen:
             gfx_ini_parser.set('Settings', 'AspectRatio', "6")
 
@@ -83,7 +121,7 @@ class DolphinRunner:
             # because configparser doesn't like '$'s.
             with open(os.path.join(self.user_dir, "GameSettings", "GALE01.ini"), "a") as game_settings_file:
                 game_settings_file.write("\n$Widescreen 16:9")
-        gfx_ini_parser.set('Settings', 'BitrateKbps', str(self.conf.bitrateKbps))
+
         gfx_ini_fp = open(gfx_ini, 'w')
         gfx_ini_parser.write(gfx_ini_fp)
         gfx_ini_fp.close()
@@ -93,6 +131,44 @@ class DolphinRunner:
         dolphin_ini_parser = configparser.ConfigParser()
         dolphin_ini_parser.optionxform = str
         dolphin_ini_parser.read(dolphin_ini)
+
+        dolphin_ini_settings = {
+            'Interface': [
+                # doesn't render properly with these enabled
+                ('ShowToolbar', 'False'),
+                ('ShowStatusbar', 'False'),
+                ('ShowSeekbar', 'False')
+            ],
+            'Display': [
+                # high res, convenience
+                ('KeepWindowOnTop', 'True'),
+                ('RenderWindowWidth', '1280'),
+                ('RenderWindowHeight', '1052'),
+                ('RenderWindowAutoSize', 'True')
+            ],
+            'Core': [
+                # rumble is annoying
+                ('AdapterRumble0', 'False'),
+                ('AdapterRumble1', 'False'),
+                ('AdapterRumble2', 'False'),
+                ('AdapterRumble3', 'False')
+            ],
+            'Movie': [
+                ('DumpFrames', 'True'),
+                ('DumpFramesSilent', 'True')
+            ],
+            'DSP': [
+                ('DumpAudio', 'True'),
+                ('DumpAudioSilent', 'True'),
+                # Other audio backends may play sound despite DumpAudioSilent
+                ('Backend', 'ALSA')
+            ]
+
+        }
+
+        for section, opts in dolphin_ini_settings.items():
+            for opt, val in opts:
+                dolphin_ini_parser.set(section, opt, val)
 
         # If using windows, run all of dolphin in the main window to keep the display cleaner. This breaks in Linux.
         if sys.platform == "win32":

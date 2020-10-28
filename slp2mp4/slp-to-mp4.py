@@ -38,7 +38,6 @@ if sys.platform == "win32":
     THIS_CONFIG = os.path.join(SCRIPT_DIR, 'config_windows.json')
 else:
     THIS_CONFIG = os.path.join(SCRIPT_DIR, 'config.json')
-THIS_USER_DIR = os.path.join(SCRIPT_DIR, 'User')
 OUT_DIR = os.path.join(SCRIPT_DIR, 'out')
 
 
@@ -74,8 +73,9 @@ def record_file_slp(slp_file, outfile):
         print("Warning: Game is less than 30 seconds and won't be recorded. Override in config.")
         return
 
+    DOLPHIN_USER_DIR = os.path.join(conf.dolphin_dir, 'User')
     # Dump frames
-    with DolphinRunner(conf, THIS_USER_DIR, SCRIPT_DIR, uuid.uuid4()) as dolphin_runner:
+    with DolphinRunner(conf, DOLPHIN_USER_DIR, SCRIPT_DIR, uuid.uuid4()) as dolphin_runner:
         video_file, audio_file = dolphin_runner.run(slp_file, num_frames)
 
         # Encode

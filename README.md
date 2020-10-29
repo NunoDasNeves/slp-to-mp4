@@ -1,51 +1,40 @@
 # slp to mp4
-This script converts [Project Slippi](https://github.com/project-slippi/project-slippi) replay files for  [Super Smash Bros. Melee](https://en.wikipedia.org/wiki/Super_Smash_Bros._Melee) to mp4 videos.
+slp-to-mp4 converts [Project Slippi](https://github.com/project-slippi/project-slippi) replay files for  [Super Smash Bros. Melee](https://en.wikipedia.org/wiki/Super_Smash_Bros._Melee) to mp4 videos.
 
-This exists as an alternative to using screen capture software to record the Dolphin window playing back a replay.
+The goal is to make it easy to batch-convert replays to HD video without screen recording software.
 
 ## Dependencies
 
-### Linux
+- Python >= 3.7  
+  https://www.python.org/downloads/
 
-Python >= 3.7  
-https://www.python.org/downloads/
+- ffmpeg for combining the raw the video and audio streams (if on Linux you can   install with your package manager)  
+  https://ffmpeg.org/download.html
 
-ffmpeg for encoding the video (if on Linux install with your package manager)  
-https://ffmpeg.org/download.html
+- A 'playback build' of Dolphin. This is a special Dolphin used for playing back Slippi replays.
+  - If your replays are from the latest rollback Slippi (e.g. 2.2.3) you can get the playback dolphin by installing Slippi Desktop App:  
+    https://slippi.gg/downloads  
+    On Windows, the playback dolphin will be installed somewhere like: C:\Users\YourName\AppData\Roaming\Slippi Desktop App\dolphin
+  - FM-Slippi-r18 playback dolphin can be found here:  
+    https://www.smashladder.com/download/dolphin/18/Project+Slippi+%28r18%29
 
-Slippi-FM-r18 for playing the slippi file and dumping the frames  
-https://www.smashladder.com/download/dolphin/18/Project+Slippi+%28r18%29
+- py-slippi for parsing the slippi file (pip install)  
+  https://github.com/hohav/py-slippi
 
-py-slippi for parsing the slippi file (pip install)  
-https://github.com/hohav/py-slippi
-
-psutil for finding number of physical cores
-https://github.com/giampaolo/psutil
-
-A Super Smash Bros. Melee v1.02 NTSC ISO.
-
-### Windows
-
-Python >= 3.7  
-https://www.python.org/downloads/
-
-py-slippi for parsing the slippi file (pip install)  
-https://github.com/hohav/py-slippi
-
-psutil for finding number of physical cores
-https://github.com/giampaolo/psutil
+- psutil for finding number of physical cores (pip install)
+  https://github.com/giampaolo/psutil
 
 A Super Smash Bros. Melee v1.02 NTSC ISO.
 
 ## Setup
 
-### Linux
+Install the above dependencies to your machine.
 
+### Linux
 Modify the paths in config.json to point to your Melee ISO, ffmpeg binary and the directory of the playback instance of Dolphin.
 
 ### Windows
-
-Copy your Super Smash Bros. Melee v1.02 NTSC ISO to SSBMelee.iso in this directory or modify config_windows.json to point to another. Then run the python script and the necessary dependencies will install. If you wish to re-install after the first recording, remove the 'installed' file.
+Modify the paths in config_windows.json to point to your Melee ISO, ffmpeg binary and the directory of the playback instance of Dolphin.
 
 ## Usage
 
@@ -110,6 +99,10 @@ For linux, the configuration file is config.json. For Windows, the file is confi
 Resolution, widescreen, bitrate, and the number of parallel games will all affect performance. Dolphin will not record well (skips additional frames) when running less than or greater than 60 FPS. It becomes noticeable below 58 FPS. YouTube requires a resolution of at least 720p to upload a 60 FPS video, so it should be a goal to run at that resolution or higher. A higher bitrate will come with better video quality but larger file size and worse performance because dolphin has more to encode. The number of parallel games will have the largest effect on performance. The 'recommended' value is the number of physical cpu cores, but greater or fewer parallel games may be optimal.
 
 ## Future work
+- Make installation/setup easier
+  - There was previously an auto-installer for ffmpeg + playback dolphin on windows, but it relied on a direct download of the playback dolphin, which isn't available for the latest slippi
+  - Would be nice to remove dependencies on py-slippi and psutil somehow.
+  - Package everything in a release
 - Multiprocessing
   - Allow combining after all required files are done recording while multiprocessing
   - Better progress reporting

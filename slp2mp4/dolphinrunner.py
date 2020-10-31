@@ -64,7 +64,12 @@ class DolphinRunner:
 
     def prep_dolphin_settings(self):
 
-        # TODO should we do this (do we need it)? Can't specify separate Sys directory like we can with User...
+        # TODO should we do this?
+        # Can't specify separate Sys directory like we can with User, so this would overwrite user's Sys settings
+        # We can't remove the option and restore it within dolphinrunner __enter__ and __exit__, because there is a dolphinrunner for each thread in parallel mode
+        # - could copy the whole dolphin dir to change this...yuck
+        # - could do this in the dolphinrunner caller and restore to the right state
+        # - could just clobber this option...
         '''
         # Remove efb_scale field. This allows selection of resolution options from GFX.ini.
         gal_ini = os.path.join(conf.dolphin_dir, "Sys", "GameSettings", "GAL.ini") # need to get sys dir in here
@@ -84,99 +89,99 @@ class DolphinRunner:
         else:
             efb_scale = RESOLUTION_DICT[self.conf.resolution]
 
-        # Apply graphics settings
-        gfx_ini = os.path.join(self.user_dir, "Config", "GFX.ini")
-        gfx_ini_parser = configparser.ConfigParser()
-        gfx_ini_parser.optionxform = str
-        gfx_ini_parser.read(gfx_ini)
+        gfx_ini_path = os.path.join(self.user_dir, "Config", "GFX.ini")
+        dolphin_ini_path = os.path.join(self.user_dir, "Config", "Dolphin.ini")
+        gale01_ini_path = os.path.join(self.user_dir, "GameSettings", "GALE01.ini")
 
-        gfx_ini_settings = {
-            'Settings': [
-                ('EFBScale', efb_scale),
+        # TODO make more of these options adjustable in config.json
+        ini_settings = {
+            gfx_ini_path: {
+                'Settings': [
+                    ('EFBScale', efb_scale),
 
-                # for getting number of frames from file (to tell if we're done)
-                ('LogRenderTimeToFile','True'),
+                    # for getting number of frames from file (to tell if we're done)
+                    ('LogRenderTimeToFile','True'),
 
-                # maybe not needed? gives better quality i guess
-                ('DumpCodec', 'H264'),
-                ('BitrateKbps', str(self.conf.bitrateKbps)),
-                ('MSAA', '8'),
-                ('SSAA', 'True')
-            ],
-            'Enhancements': [
-                ('MaxAnisotropy', '4'),
-                ('TextureScalingType', '1'),
-                ('CompileShaderOnStartup', 'True')
-            ]
+                    # maybe not needed? gives better quality i guess
+                    ('DumpCodec', 'H264'),
+                    ('BitrateKbps', str(self.conf.bitrateKbps)),
+                    ('MSAA', '8'),
+                    ('SSAA', 'True')
+                ],
+                'Enhancements': [
+                    ('MaxAnisotropy', '4'),
+                    ('TextureScalingType', '1'),
+                    ('CompileShaderOnStartup', 'True')
+                ]
+            },
+            dolphin_ini_path: {
+                'Interface': [
+                    # doesn't render properly with these enabled
+                    ('ShowToolbar', 'False'),
+                    ('ShowStatusbar', 'False'),
+                    ('ShowSeekbar', 'False')
+                ],
+                'Display': [
+                    # high res, convenience
+                    ('KeepWindowOnTop', 'True'),
+                    ('RenderWindowWidth', '1280'),
+                    ('RenderWindowHeight', '1052'),
+                    ('RenderWindowAutoSize', 'True')
+                ],
+                'Core': [
+                    # rumble is annoying
+                    ('AdapterRumble0', 'False'),
+                    ('AdapterRumble1', 'False'),
+                    ('AdapterRumble2', 'False'),
+                    ('AdapterRumble3', 'False')
+                ],
+                'Movie': [
+                    ('DumpFrames', 'True'),
+                    ('DumpFramesSilent', 'True')
+                ],
+                'DSP': [
+                    ('DumpAudio', 'True'),
+                    ('DumpAudioSilent', 'True'),
+                    # Other audio backends may play sound despite DumpAudioSilent
+                    ('Backend', 'ALSA')
+                ]
+            }
         }
-
-        for section, opts in gfx_ini_settings.items():
-            for opt, val in opts:
-                gfx_ini_parser.set(section, opt, val)
-
-        if self.conf.widescreen:
-            gfx_ini_parser.set('Settings', 'AspectRatio', "6")
-
-            # append this to the file to enable the gecko code instead of using configparser
-            # because configparser doesn't like '$'s.
-            with open(os.path.join(self.user_dir, "GameSettings", "GALE01.ini"), "a") as game_settings_file:
-                game_settings_file.write("\n$Widescreen 16:9")
-
-        gfx_ini_fp = open(gfx_ini, 'w')
-        gfx_ini_parser.write(gfx_ini_fp)
-        gfx_ini_fp.close()
-
-        # Apply dolphin settings
-        dolphin_ini = os.path.join(self.user_dir, "Config", "Dolphin.ini")
-        dolphin_ini_parser = configparser.ConfigParser()
-        dolphin_ini_parser.optionxform = str
-        dolphin_ini_parser.read(dolphin_ini)
-
-        dolphin_ini_settings = {
-            'Interface': [
-                # doesn't render properly with these enabled
-                ('ShowToolbar', 'False'),
-                ('ShowStatusbar', 'False'),
-                ('ShowSeekbar', 'False')
-            ],
-            'Display': [
-                # high res, convenience
-                ('KeepWindowOnTop', 'True'),
-                ('RenderWindowWidth', '1280'),
-                ('RenderWindowHeight', '1052'),
-                ('RenderWindowAutoSize', 'True')
-            ],
-            'Core': [
-                # rumble is annoying
-                ('AdapterRumble0', 'False'),
-                ('AdapterRumble1', 'False'),
-                ('AdapterRumble2', 'False'),
-                ('AdapterRumble3', 'False')
-            ],
-            'Movie': [
-                ('DumpFrames', 'True'),
-                ('DumpFramesSilent', 'True')
-            ],
-            'DSP': [
-                ('DumpAudio', 'True'),
-                ('DumpAudioSilent', 'True'),
-                # Other audio backends may play sound despite DumpAudioSilent
-                ('Backend', 'ALSA')
-            ]
-
-        }
-
-        for section, opts in dolphin_ini_settings.items():
-            for opt, val in opts:
-                dolphin_ini_parser.set(section, opt, val)
 
         # If using windows, run all of dolphin in the main window to keep the display cleaner. This breaks in Linux.
         if sys.platform == "win32":
-            dolphin_ini_parser.set('Display', 'RenderToMain', "True")
+            ini_settings[dolphin_ini_path]['Display'].append(('RenderToMain', "True"))
 
-        dolphin_ini_fp = open(dolphin_ini, 'w')
-        dolphin_ini_parser.write(dolphin_ini_fp)
-        dolphin_ini_fp.close()
+        if self.conf.widescreen:
+            ini_settings[gfx_ini_path]['Settings'].append(('AspectRatio', "6"))
+
+            # kinda hack to figure out what option format we need for widescreen
+            # it's this for older versions of slippi:
+            widescreen_code = '$Widescreen 16:9'
+            with open(gale01_ini_path, 'r') as f:
+                # it's this for newer (since rollback? idk, tell me if this breaks)
+                if '$Required: Slippi Playback' in f.read():
+                    widescreen_code = '$Optional: Widescreen 16:9'
+
+            ini_settings[gale01_ini_path] = {
+                'Gecko_Enabled': [
+                    (widescreen_code,)
+                ]
+            }
+
+        for ini_path, opt_dict in ini_settings.items():
+            # need these args to ensure Gecko_Enabled options (GALE01.ini) are parsed correctly
+            ini_parser = configparser.ConfigParser(allow_no_value=True, delimiters=('=',))
+
+            ini_parser.optionxform = str
+            ini_parser.read(ini_path)
+            for section, opts in opt_dict.items():
+                for opt_tuple in opts:
+                    ini_parser.set(section, *opt_tuple)
+
+            ini_fp = open(ini_path, 'w')
+            ini_parser.write(ini_fp)
+            ini_fp.close()
 
     def prep_user_dir(self):
         # We need to remove the render time file because we read it to figure out when dolphin is done

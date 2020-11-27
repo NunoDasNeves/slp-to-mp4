@@ -22,8 +22,9 @@ class FfmpegRunner:
         cmd = [
             self.ffmpeg_bin,
             '-y',                   # overwrite output file without asking
-            '-i', audio_file,  # 0th input stream: audio
-            '-itsoffset', '1.55',   # offset (delay) the audio by 1.55s
+            '-i', audio_file,       # 0th input stream: audio
+            # offset no longer needed!
+            #'-itsoffset', '1.55',   # offset (delay) the audio by 1.55s
             '-i', video_file,  # 1st input stream: video
             '-map', '1:v',          # map 1st input to video output
             '-map', '0:a',          # map 0th input to audio output

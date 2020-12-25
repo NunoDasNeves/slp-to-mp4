@@ -1,4 +1,5 @@
 import os, json, sys
+import shutil
 
 THIS_DIR, _ = os.path.split(os.path.abspath(__file__))
 
@@ -17,7 +18,7 @@ class Config:
             self.check_path(self.melee_iso)
             self.dolphin_dir = os.path.expanduser(j['dolphin_dir'])
             self.check_path(self.dolphin_dir)
-            self.ffmpeg = os.path.expanduser(j['ffmpeg'])
+            self.ffmpeg = os.path.expanduser(shutil.which(j['ffmpeg']))
             self.check_path(self.ffmpeg)
             self.resolution = j['resolution']
             self.widescreen = j['widescreen']

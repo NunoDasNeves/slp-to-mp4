@@ -82,7 +82,7 @@ slp2mp4/out/Set_A.mp4
 ## Configuration
 For linux, the configuration file is config.json. For Windows, the file is config_windows.json. 
 - 'melee_iso' is the path to your Super Smash Bros. Melee 1.02 ISO. 
-- 'dolphin_dir' and 'ffmpeg' in linux need to be set to the playback path in the installed version of dolphin, and the default installed path of ffmpeg. In windows, these dependencies are downloaded and installed in the local directory so there is no need to change the paths
+- 'dolphin_dir' and 'ffmpeg' in linux need to be set to the playback path in the installed version of dolphin, and the default installed path of ffmpeg. In windows, these dependencies are downloaded and installed in the local directory so there is no need to change the paths; 'ffmpeg' can also be the command name if it's in your PATH
 - 'resolution' can be set to the following. The output resolution is the minimum resolution dolphin can run above the resolution in this configuration.
   - 480p
   - 720p

@@ -34,7 +34,7 @@ Install the above dependencies to your machine.
 Modify the paths in config.json to point to your Melee ISO, ffmpeg binary and the directory of the playback instance of Dolphin.
 
 ### Windows
-1. Modify the paths in config_windows.json to point to your Melee ISO, ffmpeg binary and the directory of the playback instance of Dolphin.
+1. Modify the paths in config_windows.json to point to your Melee ISO, and ffmpeg binary.
 
 2. Copy your **Playpack** Dolphin location to `dolphin_dir` in `config[_windows].json`, you can find this by going into the Slippi Launcher -> Settings -> Dolphin settings -> Playback -> Open containing folder
 

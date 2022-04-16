@@ -34,7 +34,13 @@ Install the above dependencies to your machine.
 Modify the paths in config.json to point to your Melee ISO, ffmpeg binary and the directory of the playback instance of Dolphin.
 
 ### Windows
-Modify the paths in config_windows.json to point to your Melee ISO, ffmpeg binary and the directory of the playback instance of Dolphin.
+1. Modify the paths in config_windows.json to point to your Melee ISO, and ffmpeg binary.
+
+2. Copy your **Playpack** Dolphin location to `dolphin_dir` in `config[_windows].json`, you can find this by going into the Slippi Launcher -> Settings -> Dolphin settings -> Playback -> Open containing folder
+
+3. Copy the `GALE01.ini` file included in this repo to (`User/GameSettings/GALE01.ini`) to that same location in your playback dolphin location (this may not be required)
+
+4. Change `DOLPHIN_NAME` to equal `Slippi Dolphin.exe` in `config.py`
 
 ## Usage
 

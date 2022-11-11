@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, sys, json, subprocess, time, shutil, uuid, multiprocessing, psutil, glob
+import os, sys, json, subprocess, time, shutil, uuid, multiprocessing, glob
 from pathlib import Path
 from slippi import Game
 from config import Config
@@ -50,7 +50,7 @@ def is_game_too_short(num_frames, remove_short):
 
 def get_num_processes(conf):
     if conf.parallel_games == "recommended":
-        return psutil.cpu_count(logical=False)
+        return multiprocessing.cpu_count()
     else:
         return int(conf.parallel_games)
 

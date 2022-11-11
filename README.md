@@ -18,8 +18,8 @@ The goal is to make it easy to batch-convert replays to HD video without screen 
   - FM-Slippi-r18 playback dolphin can be found here:  
     https://www.smashladder.com/download/dolphin/18/Project+Slippi+%28r18%29
 
-- psutil for finding number of physical cores (pip install)
-  https://github.com/giampaolo/psutil
+- py-slippi for parsing the slippi file (pip install)  
+  https://github.com/hohav/py-slippi
 
 A Super Smash Bros. Melee v1.02 NTSC ISO.
 

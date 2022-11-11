@@ -5,7 +5,7 @@ THIS_DIR, _ = os.path.split(os.path.abspath(__file__))
 
 if sys.platform == "win32":
     THIS_CONFIG = os.path.join(THIS_DIR, 'config_windows.json')
-    DOLPHIN_NAME = 'Dolphin.exe'
+    DOLPHIN_NAME = 'Slippi Dolphin.exe'
 else:
     THIS_CONFIG = os.path.join(THIS_DIR, 'config.json')
     DOLPHIN_NAME = 'dolphin-emu'

@@ -21,9 +21,6 @@ The goal is to make it easy to batch-convert replays to HD video without screen 
 - py-slippi for parsing the slippi file (pip install)  
   https://github.com/hohav/py-slippi
 
-- psutil for finding number of physical cores (pip install)
-  https://github.com/giampaolo/psutil
-
 A Super Smash Bros. Melee v1.02 NTSC ISO.
 
 ## Setup
